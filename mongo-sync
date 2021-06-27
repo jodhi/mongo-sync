@@ -15,8 +15,6 @@ function cleanup {
     fi
     unset TUNNEL_PORT
     unset TUNNEL_CREDENTIALS
-    unset LOCAL_CREDENTIALS
-    unset REMOTE_CREDENTIALS
 }
 
 function error {
@@ -120,15 +118,6 @@ function load_configs {
     # - $tunnel_access_username
     # - $tunnel_access_port
 
-    LOCAL_CREDENTIALS=""
-    if [[ ! -z $local_access_username ]] ; then
-        LOCAL_CREDENTIALS="-u $local_access_username -p $local_access_password"
-    fi
-
-    REMOTE_CREDENTIALS=""
-    if [[ ! -z $remote_access_username ]] ; then
-        REMOTE_CREDENTIALS="-u $remote_access_username -p $remote_access_password"
-    fi
 
     TUNNEL_CREDENTIALS="$tunnel_access_username@$remote_host_url"
     TUNNEL_PORT=27018
@@ -177,17 +166,14 @@ function pull {
 
     echo "Dumping Remote DB to $TMPDIR... "
     mongodump \
-        -h "$remote_host_url":"$remote_host_port" \
-        -d "$remote_db" \
-        $REMOTE_CREDENTIALS \
+        --uri "$remote_uri" \
         -o "$TMPDIR" > /dev/null
     success_msg
 
     echo "Overwriting Local DB with Dump... "
     mongorestore \
-        --port "$local_host_port" \
+        --uri "$local_uri" \
         -d "$local_db" \
-        $LOCAL_CREDENTIALS \
         "$TMPDIR"/"$remote_db" \
         --drop > /dev/null
     success_msg
@@ -215,17 +201,15 @@ function push {
 
     echo "Dumping Local DB to $TMPDIR... "
     mongodump \
-        --port "$local_host_port" \
+        --uri "$local_uri" \
         -d "$local_db" \
-        $LOCAL_CREDENTIALS \
         -o "$TMPDIR" > /dev/null
     success_msg
 
     echo "Overwriting Remote DB with Dump... "
     mongorestore \
-        -h "$remote_host_url":"$remote_host_port" \
-        -d "$remote_db" \
-        $REMOTE_CREDENTIALS \
+        --uri "$remote_uri" \
+        --db "$remote_db" \
         "$TMPDIR"/"$local_db" --drop > /dev/null
     success_msg
 
