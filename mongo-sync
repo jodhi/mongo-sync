@@ -77,14 +77,6 @@ function get_script_dir {
     echo $SCRIPT_PATH
 }
 
-function get_confirmation() {
-    read -p "Are you sure you want to $1? Enter 'yes': " mongo_confr
-
-    case $mongo_confr in
-        [yY][Ee][Ss] )  ;;
-        *) echo "Incorrect input, aborting..."; exit;;
-    esac
-}
 
 function load_configs {
     echo "load_configs"
@@ -153,9 +145,6 @@ function close_tunnel {
 
 function pull {
     banner
-    if [ "$1" == false ] ; then
-        get_confirmation 'pull'
-    fi
     load_configs
 
     if [ "$tunnel_on" == true ] ; then
@@ -188,9 +177,6 @@ function pull {
 
 function push {
     banner
-    if [ "$1" == false ] ; then
-        get_confirmation 'push'
-    fi
     load_configs
 
     if [ "$tunnel_on" == true ] ; then
